@@ -2683,6 +2683,18 @@ End Function
         <Field Name="PageGroupNo">
           <DataField>PageGroupNo</DataField>
         </Field>
+        <Field Name="RunningTotalBefore">
+          <DataField>RunningTotalBefore</DataField>
+        </Field>
+        <Field Name="RunningTotalBeforeFormat">
+          <DataField>RunningTotalBeforeFormat</DataField>
+        </Field>
+        <Field Name="RunningTotal">
+          <DataField>RunningTotal</DataField>
+        </Field>
+        <Field Name="RunningTotalFormat">
+          <DataField>RunningTotalFormat</DataField>
+        </Field>
         <Field Name="DescriptionNormal">
           <DataField>DescriptionNormal</DataField>
         </Field>
@@ -2793,6 +2805,12 @@ End Function
         </Field>
         <Field Name="AttachedDescription">
           <DataField>AttachedDescription</DataField>
+        </Field>
+        <Field Name="TermsCaption">
+          <DataField>TermsCaption</DataField>
+        </Field>
+        <Field Name="TermsText">
+          <DataField>TermsText</DataField>
         </Field>
       </Fields>
       <Query>

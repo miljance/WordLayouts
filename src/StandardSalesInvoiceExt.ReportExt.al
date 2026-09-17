@@ -1,5 +1,6 @@
 namespace WordLayouts.Sales;
 
+using Microsoft.Foundation.PaymentTerms;
 using Microsoft.Sales.History;
 using System.Utilities;
 
@@ -7,6 +8,14 @@ reportextension 50100 "Standard Sales Invoice Ext." extends "Standard Sales - In
 {
     dataset
     {
+        modify(Header)
+        {
+            trigger OnAfterAfterGetRecord()
+            begin
+                RunningTotal := 0;
+                RunningTotalBefore := 0;
+            end;
+        }
         add(Line)
         {
             column(LineFormatStyle; Format(Line."Style", 0, 2))
@@ -15,6 +24,8 @@ reportextension 50100 "Standard Sales Invoice Ext." extends "Standard Sales - In
             column(PageGroupNo; PageGroupNo)
             {
             }
+            column(RunningTotalBefore; RunningTotalBefore) { }
+            column(RunningTotal; RunningTotal) { }
         }
         modify(Line)
         {
@@ -24,6 +35,8 @@ reportextension 50100 "Standard Sales Invoice Ext." extends "Standard Sales - In
                     CurrReport.Skip();
                 if Line."New Page" then
                     PageGroupNo += 1;
+                RunningTotalBefore := RunningTotal;
+                RunningTotal += Line.Amount;
             end;
 
             trigger OnAfterPreDataItem()
@@ -130,6 +143,25 @@ reportextension 50100 "Standard Sales Invoice Ext." extends "Standard Sales - In
                 column(AttachedDescription; Description) { }
             }
         }
+        addafter(Line)
+        {
+            dataitem(ShowTerms; Integer)
+            {
+                DataItemTableView = sorting(Number) where(Number = const(1));
+
+                column(TermsCaption; PaymentTerms.Description) { }
+                column(TermsText; TermsTxt) { }
+
+                trigger OnPreDataItem()
+                begin
+                    if not PaymentTerms.Get(Header."Payment Terms Code") then
+                        CurrReport.Break();
+                    if PaymentTerms.Description = '' then
+                        CurrReport.Break();
+                    TermsTxt := StrSubstNo(TermsLbl, PaymentTerms.Description, Header."Due Date");
+                end;
+            }
+        }
     }
 
     rendering
@@ -149,6 +181,12 @@ reportextension 50100 "Standard Sales Invoice Ext." extends "Standard Sales - In
             Summary = 'Modern RDLC layout for the Standard Sales Invoice.';
         }
     }
+
+    var
+        PaymentTerms: Record "Payment Terms";
+        RunningTotal, RunningTotalBefore : Decimal;
+        TermsTxt: Text;
+        TermsLbl: Label 'Payment terms: %1 — due %2', Comment = '%1 = payment terms description, %2 = due date';
 
     protected var
         PageGroupNo: Integer;
